@@ -436,30 +436,35 @@ def admin_dashboard():
             os_counts["Other"] += 1
 
     # 2. Failed Logins Trend (Last 24h, 4h buckets)
-    # We look for alerts with category='auth' or 'security' and high severity
+    # We look for events with category='auth' or 'security' and high severity
+    from app.models.event import Event
     now = _now_utc()
     since_24h = now - timedelta(hours=24)
     
-    login_alerts = []
-    for a in alerts:
-        created_at = a.created_at
-        if created_at and created_at.tzinfo is None:
-            created_at = created_at.replace(tzinfo=timezone.utc)
-            
-        if (created_at >= since_24h 
-            and (a.category in ["auth", "security", "login"])
-            and ("fail" in (a.title or "").lower() or "fail" in (a.message or "").lower())):
-            login_alerts.append(a)
+    login_events = (
+        Event.query.filter(Event.organization_id == org.id)
+        .filter(Event.ts >= since_24h)
+        .filter(Event.category.in_(["auth", "security", "login"]))
+        .all()
+    )
+
+    # Filter for failures in Python (or add to query if simple)
+    failed_events = []
+    for e in login_events:
+        msg = (e.message or "").lower()
+        dtl = (e.detail or "").lower()
+        if "fail" in msg or "fail" in dtl:
+            failed_events.append(e)
     
     # Bucket into 6 4-hour slots
     failed_logins_trend = [0] * 6
-    for a in login_alerts:
+    for e in failed_events:
         # Calculate which bucket (0 = oldest, 5 = newest)
-        created_at = a.created_at
-        if created_at and created_at.tzinfo is None:
-            created_at = created_at.replace(tzinfo=timezone.utc)
+        ts = e.ts
+        if ts and ts.tzinfo is None:
+            ts = ts.replace(tzinfo=timezone.utc)
             
-        age_hours = (now - created_at).total_seconds() / 3600
+        age_hours = (now - ts).total_seconds() / 3600
         bucket_idx = 5 - int(age_hours / 4)
         if 0 <= bucket_idx <= 5:
             failed_logins_trend[bucket_idx] += 1
@@ -477,7 +482,7 @@ def admin_dashboard():
         .filter(Device.organization_id == org.id)
         .filter(DeviceTelemetry.ts >= since_24h)
         .order_by(DeviceTelemetry.ts.asc())
-        .limit(1000)
+        # .limit(1000)  <-- REMOVED LIMIT to ensure we see recent data
         .all()
     )
 
