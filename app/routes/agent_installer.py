@@ -178,7 +178,7 @@ def _build_windows_ps(org: Organization, base: str) -> str:
         }}
 
         Write-Host "⬇️  Installing dependencies..."
-        & "$root\\venv\\Scripts\\python.exe" -m pip install --upgrade pip requests psutil
+        & "$root\\venv\\Scripts\\python.exe" -m pip install --upgrade pip requests psutil watchdog
 
         Write-Host "⬇️  Fetching agent client..."
         $client = "{base}/install/agent/client/{org.agent_token}"
@@ -370,6 +370,7 @@ def serve_agent_client(org_token: str):
         - Registers device
         - Sends heartbeats every 2s (Real-time)
         - Streams login/logout events immediately
+        - Monitors file system for new executables
         \"\"\"
         import os, time, socket, uuid, threading, subprocess, platform, shutil, sys
         from datetime import datetime, timezone
@@ -379,6 +380,14 @@ def serve_agent_client(org_token: str):
             import psutil
         except ImportError:
             psutil = None
+
+        # Watchdog for file monitoring
+        try:
+            from watchdog.observers import Observer
+            from watchdog.events import FileSystemEventHandler
+        except ImportError:
+            Observer = None
+            FileSystemEventHandler = object
 
         SERVER = "{base}"
         ORG_TOKEN = "{org.agent_token}"
@@ -494,6 +503,66 @@ def serve_agent_client(org_token: str):
             code, body = post("/api/agent/ai/event", payload)
             log(f"event({{category}}/{{action}}) -> {{code}}")
             return code
+
+        # -------------- File Monitoring (Watchdog) --------------
+        class ExecutableHandler(FileSystemEventHandler):
+            def on_created(self, event):
+                if event.is_directory:
+                    return
+                self._check(event.src_path, "created")
+
+            def on_moved(self, event):
+                if event.is_directory:
+                    return
+                self._check(event.dest_path, "moved/renamed")
+
+            def _check(self, filepath, action):
+                # Filter out noisy system paths
+                lower_path = filepath.lower()
+                if "windows\\servicing" in lower_path or "windows\\winsxs" in lower_path or "appdata\\local\\temp" in lower_path:
+                    return
+
+                ext = os.path.splitext(lower_path)[1]
+                if ext in ['.exe', '.bat', '.ps1', '.msi', '.vbs', '.com']:
+                    log(f"New executable detected: {{filepath}}")
+                    send_event("file", "created", f"New executable detected: {{filepath}} ({{action}})", "medium")
+
+        def start_file_watcher():
+            if not Observer:
+                log("Watchdog library not found. File monitoring disabled.")
+                return
+
+            log("Starting File System Monitor (Executables)...")
+            observer = Observer()
+            handler = ExecutableHandler()
+
+            # Detect fixed drives
+            drives = []
+            if platform.system() == 'Windows':
+                try:
+                    import string
+                    from ctypes import windll
+                    drives = []
+                    bitmask = windll.kernel32.GetLogicalDrives()
+                    for letter in string.ascii_uppercase:
+                        if bitmask & 1:
+                            drives.append(f"{{letter}}:\\")
+                        bitmask >>= 1
+                except:
+                    drives = ["C:\\"]
+            else:
+                drives = ["/"]
+
+            for drive in drives:
+                if os.path.exists(drive):
+                    try:
+                        # Recursive watch on root of drive
+                        observer.schedule(handler, drive, recursive=True)
+                        log(f"Watching drive: {{drive}}")
+                    except Exception as e:
+                        log(f"Failed to watch {{drive}}: {{e}}")
+
+            observer.start()
 
         # -------------- Auth Monitoring (Cross-Platform) --------------
         
@@ -644,6 +713,7 @@ def serve_agent_client(org_token: str):
 
             # Start Event Monitoring
             start_auth_watcher()
+            start_file_watcher()
 
             # Heartbeat Loop
             while True:
