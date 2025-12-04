@@ -661,6 +661,73 @@ def serve_agent_client(org_token: str):
                 
                 time.sleep(30)
 
+        # -------------- Network Intrusion Detection (Reverse Shells / Bad Ports) --------------
+        def monitor_network():
+            \"\"\"Scans for suspicious network connections (Reverse Shells, Bad Ports).\"\"\"
+            SUSPICIOUS_PORTS = [4444, 1337, 6667, 31337, 12345]
+            SHELL_PROCESSES = ["cmd.exe", "powershell.exe", "bash", "sh", "nc.exe", "ncat.exe"]
+            
+            log("Starting Network Monitor (Interval: 60s)...")
+            
+            seen_connections = set() # hash of pid+ip+port
+
+            while True:
+                try:
+                    current_conns = set()
+                    if psutil:
+                        # Scan all inet connections
+                        for conn in psutil.net_connections(kind='inet'):
+                            try:
+                                if conn.status != 'ESTABLISHED':
+                                    continue
+                                    
+                                pid = conn.pid
+                                if not pid: continue
+                                
+                                proc = psutil.Process(pid)
+                                name = (proc.name() or "").lower()
+                                
+                                raddr = conn.raddr
+                                if not raddr: continue
+                                
+                                remote_ip, remote_port = raddr
+                                
+                                # Ignore local/private IPs (simple check)
+                                if remote_ip.startswith("127.") or remote_ip.startswith("192.168.") or remote_ip.startswith("10."):
+                                    continue
+                                    
+                                conn_id = f"{{pid}}-{{remote_ip}}-{{remote_port}}"
+                                current_conns.add(conn_id)
+                                
+                                if conn_id in seen_connections:
+                                    continue
+
+                                # 1. Check Bad Ports
+                                if remote_port in SUSPICIOUS_PORTS:
+                                    msg = f"Suspicious outbound connection to port {{remote_port}} from {{name}} (PID: {{pid}})"
+                                    log(msg)
+                                    send_event("network", "suspicious_port", msg, "high")
+                                    seen_connections.add(conn_id)
+                                    continue
+
+                                # 2. Check Reverse Shells (Shell process connecting to internet)
+                                if name in SHELL_PROCESSES:
+                                    msg = f"Reverse Shell Detected: {{name}} connected to {{remote_ip}}:{{remote_port}}"
+                                    log(msg)
+                                    send_event("network", "reverse_shell", msg, "critical")
+                                    seen_connections.add(conn_id)
+
+                            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                                pass
+                    
+                    # Cleanup seen_connections
+                    seen_connections = seen_connections.intersection(current_conns)
+
+                except Exception as e:
+                    log(f"Network monitor error: {{e}}")
+                
+                time.sleep(60)
+
         # -------------- Auth Monitoring (Cross-Platform) --------------
         
         def tail_linux_auth():
@@ -813,6 +880,9 @@ def serve_agent_client(org_token: str):
             
             # Start Process Monitoring
             threading.Thread(target=monitor_processes, daemon=True).start()
+            
+            # Start Network Monitoring
+            threading.Thread(target=monitor_network, daemon=True).start()
 
             # Heartbeat Loop
             while True:
