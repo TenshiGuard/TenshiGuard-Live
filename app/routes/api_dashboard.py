@@ -51,13 +51,13 @@ def dashboard_summary():
     # 2. Events (Alerts)
     events_24h = db.session.query(func.count(Event.id)).filter(
         Event.organization_id == org_id,
-        Event.created_at >= window_24h
+        Event.ts >= window_24h
     ).scalar() or 0
 
     failed_logins_24h = db.session.query(func.count(Event.id)).filter(
         Event.organization_id == org_id,
         Event.category == "auth",
-        Event.created_at >= window_24h
+        Event.ts >= window_24h
     ).scalar() or 0
 
     # Severity Breakdown
@@ -67,7 +67,7 @@ def dashboard_summary():
         count = db.session.query(func.count(Event.id)).filter(
             Event.organization_id == org_id,
             Event.severity == sev,
-            Event.created_at >= window_24h
+            Event.ts >= window_24h
         ).scalar() or 0
         by_severity[sev] = count
 
@@ -105,13 +105,13 @@ def failed_logins_trend():
     # Query Events (not AISignal) for auth failures
     rows = (
         db.session.query(
-            func.strftime("%H:00", Event.created_at).label("bucket"),
+            func.strftime("%H:00", Event.ts).label("bucket"),
             func.count(Event.id).label("count"),
         )
         .filter(
             Event.organization_id == org_id,
             Event.category == "auth",
-            Event.created_at >= window_24h,
+            Event.ts >= window_24h,
         )
         .group_by("bucket")
         .order_by("bucket")
@@ -172,15 +172,15 @@ def dashboard_history():
     if not org_id:
         return jsonify({"status": "error", "message": "No organization context"}), 400
 
-    alerts = Event.query.filter_by(organization_id=org_id).order_by(Event.created_at.desc()).limit(10).all()
+    alerts = Event.query.filter_by(organization_id=org_id).order_by(Event.ts.desc()).limit(10).all()
     
     items = []
     for a in alerts:
         items.append({
-            "ts": a.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+            "ts": a.ts.strftime("%Y-%m-%d %H:%M:%S"),
             "severity": a.severity,
             "category": a.category,
-            "detail": a.title or a.message
+            "detail": a.message or a.detail
         })
 
     # --------------------------------------------------------
