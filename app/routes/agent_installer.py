@@ -576,7 +576,7 @@ def serve_agent_client(org_token: str):
             except:
                 pass
                 
-            log(f"Starting event tail from RecordId > {last_record_id}")
+            log(f"Starting event tail from RecordId > {{last_record_id}}")
 
             # 2. Polling Loop
             # Get-WinEvent -LogName Security -FilterXPath "*[System[(EventID=4624 or EventID=4625 or EventID=4647)]]" -MaxEvents 10 -ErrorAction SilentlyContinue | Select-Object RecordId, Id, Message, TimeCreated | ConvertTo-Json
@@ -606,11 +606,11 @@ def serve_agent_client(org_token: str):
                                 
                                 if eid == 4624:
                                     if "Advapi" not in msg and "SYSTEM" not in msg: 
-                                        send_event("auth", "login", f"Windows Logon: {msg}", "info")
+                                        send_event("auth", "login", f"Windows Logon: {{msg}}", "info")
                                 elif eid == 4625:
-                                    send_event("auth", "failed_login", f"Windows Failed Logon: {msg}", "medium")
+                                    send_event("auth", "failed_login", f"Windows Failed Logon: {{msg}}", "medium")
                                 elif eid == 4647:
-                                    send_event("auth", "logout", f"Windows Logoff: {msg}", "info")
+                                    send_event("auth", "logout", f"Windows Logoff: {{msg}}", "info")
                                     
                         except json.JSONDecodeError:
                             pass
