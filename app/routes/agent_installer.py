@@ -426,7 +426,15 @@ def serve_agent_client(org_token: str):
         # ------------------ Helpers ------------------
         def log(msg):
             now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
-            print(f"[agent] {{now}} :: {{msg}}", flush=True)
+            line = f"[agent] {{now}} :: {{msg}}"
+            print(line, flush=True)
+            try:
+                # Simple file logging for debugging
+                log_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "agent.log")
+                with open(log_path, "a", encoding="utf-8") as f:
+                    f.write(line + "\\n")
+            except:
+                pass
 
         def mac_address():
             try:
