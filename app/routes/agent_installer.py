@@ -582,9 +582,11 @@ def serve_agent_client(org_token: str):
                     # Constructing a precise query is hard without a persistent PS session.
                     # Let's try a simpler polling loop using subprocess.
                     
+                    # Optimized query using FilterXPath for performance
+                    # *[System[(EventID=4624 or EventID=4625 or EventID=4647) and TimeCreated[timediff(@SystemTime) <= 3000]]]
                     cmd = [
                         "powershell", "-Command",
-                        "Get-WinEvent -LogName Security -MaxEvents 5 -ErrorAction SilentlyContinue | Where-Object {{ $_.TimeCreated -gt (Get-Date).AddSeconds(-3) -and ($_.Id -eq 4624 -or $_.Id -eq 4625 -or $_.Id -eq 4647) }} | Select-Object Id, Message, TimeCreated | ConvertTo-Json"
+                        "Get-WinEvent -LogName Security -FilterXPath \"*[System[(EventID=4624 or EventID=4625 or EventID=4647) and TimeCreated[timediff(@SystemTime) <= 3000]]]\" -ErrorAction SilentlyContinue | Select-Object Id, Message, TimeCreated | ConvertTo-Json"
                     ]
                     
                     try:
