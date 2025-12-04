@@ -557,7 +557,7 @@ def serve_agent_client(org_token: str):
             def _check(self, filepath, action):
                 # Filter out noisy system paths
                 lower_path = filepath.lower()
-                if "windows\\\\servicing" in lower_path or "windows\\\\winsxs" in lower_path or "appdata\\\\local\\\\temp" in lower_path:
+                if "windows\\\\\\\\servicing" in lower_path or "windows\\\\\\\\winsxs" in lower_path or "appdata\\\\\\\\local\\\\\\\\temp" in lower_path:
                     return
 
                 ext = os.path.splitext(lower_path)[1]
@@ -584,10 +584,10 @@ def serve_agent_client(org_token: str):
                     bitmask = windll.kernel32.GetLogicalDrives()
                     for letter in string.ascii_uppercase:
                         if bitmask & 1:
-                            drives.append(f"{{letter}}:\\\\")
+                            drives.append(f"{{letter}}:\\\\\\\\")
                         bitmask >>= 1
                 except:
-                    drives = ["C:\\"]
+                    drives = ["C:\\\\"]
             else:
                 drives = ["/"]
 
