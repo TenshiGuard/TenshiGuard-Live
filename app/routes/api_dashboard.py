@@ -49,25 +49,25 @@ def dashboard_summary():
     offline_devices = max(total_devices - online_devices, 0)
 
     # 2. Events (Alerts)
-    events_24h = db.session.query(func.count(Alert.id)).filter(
-        Alert.organization_id == org_id,
-        Alert.created_at >= window_24h
+    events_24h = db.session.query(func.count(Event.id)).filter(
+        Event.organization_id == org_id,
+        Event.created_at >= window_24h
     ).scalar() or 0
 
-    failed_logins_24h = db.session.query(func.count(Alert.id)).filter(
-        Alert.organization_id == org_id,
-        Alert.category == "auth",
-        Alert.created_at >= window_24h
+    failed_logins_24h = db.session.query(func.count(Event.id)).filter(
+        Event.organization_id == org_id,
+        Event.category == "auth",
+        Event.created_at >= window_24h
     ).scalar() or 0
 
     # Severity Breakdown
     severities = ["critical", "high", "medium", "low", "info"]
     by_severity = {}
     for sev in severities:
-        count = db.session.query(func.count(Alert.id)).filter(
-            Alert.organization_id == org_id,
-            Alert.severity == sev,
-            Alert.created_at >= window_24h
+        count = db.session.query(func.count(Event.id)).filter(
+            Event.organization_id == org_id,
+            Event.severity == sev,
+            Event.created_at >= window_24h
         ).scalar() or 0
         by_severity[sev] = count
 
@@ -102,16 +102,16 @@ def failed_logins_trend():
     now = _utc_now()
     window_24h = now - timedelta(hours=24)
 
-    # Query Alerts (not AISignal) for auth failures
+    # Query Events (not AISignal) for auth failures
     rows = (
         db.session.query(
-            func.strftime("%H:00", Alert.created_at).label("bucket"),
-            func.count(Alert.id).label("count"),
+            func.strftime("%H:00", Event.created_at).label("bucket"),
+            func.count(Event.id).label("count"),
         )
         .filter(
-            Alert.organization_id == org_id,
-            Alert.category == "auth",
-            Alert.created_at >= window_24h,
+            Event.organization_id == org_id,
+            Event.category == "auth",
+            Event.created_at >= window_24h,
         )
         .group_by("bucket")
         .order_by("bucket")
@@ -144,7 +144,7 @@ def top_devices():
     items = []
     for d in devices:
         # Count events for this device
-        evt_count = Alert.query.filter_by(device_id=d.id).count()
+        evt_count = Event.query.filter_by(device_id=d.id).count()
         items.append({
             "device_name": d.device_name,
             "mac": d.mac,
@@ -172,7 +172,7 @@ def dashboard_history():
     if not org_id:
         return jsonify({"status": "error", "message": "No organization context"}), 400
 
-    alerts = Alert.query.filter_by(organization_id=org_id).order_by(Alert.created_at.desc()).limit(10).all()
+    alerts = Event.query.filter_by(organization_id=org_id).order_by(Event.created_at.desc()).limit(10).all()
     
     items = []
     for a in alerts:
