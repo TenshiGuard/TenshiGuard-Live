@@ -64,6 +64,11 @@ def _get_or_create_device(org: Organization, data: dict) -> tuple[Device | None,
     if plan == "basic" and count >= 5:
         return None, "Basic plan limit reached (max 5 agents). Please upgrade."
 
+    # SECURITY CHECK: Ensure MAC is not taken by another org (since MAC is unique=True)
+    existing_global = Device.query.filter_by(mac=mac).first()
+    if existing_global and existing_global.organization_id != org.id:
+        return None, "Device MAC already registered to another organization."
+
     dev = Device(
         organization_id=org.id,
         device_name=hostname,
@@ -130,6 +135,45 @@ def ingest_ai_event():
         return jsonify({"ok": False, "message": "AI engine not configured"}), 500
 
     ai_signal = engine.analyze(normalized)
+
+    # ------------------------------------------------------------
+    # 4.5) Risk Scoring & Decay
+    # ------------------------------------------------------------
+    if device and ai_signal:
+        try:
+            now = datetime.now(timezone.utc)
+            
+            # A) Decay existing score if time passed
+            if device.last_risk_update:
+                # Ensure tz-aware comparison
+                last_update = device.last_risk_update
+                if last_update.tzinfo is None:
+                    last_update = last_update.replace(tzinfo=timezone.utc)
+                
+                hours_passed = (now - last_update).total_seconds() / 3600
+                if hours_passed >= 1:
+                    # Decay 10% per hour
+                    decay_factor = 0.9 ** int(hours_passed)
+                    device.risk_score = int((device.risk_score or 0) * decay_factor)
+            
+            # B) Add new risk based on severity
+            severity = ai_signal.get("severity", "info").lower()
+            risk_map = {"critical": 50, "high": 20, "medium": 5, "low": 1, "info": 0}
+            added_risk = risk_map.get(severity, 0)
+            
+            device.risk_score = (device.risk_score or 0) + added_risk
+            device.last_risk_update = now
+            
+            # C) Update Risk Level Label
+            score = device.risk_score
+            if score >= 80: device.risk_level = "critical"
+            elif score >= 40: device.risk_level = "high"
+            elif score >= 10: device.risk_level = "medium"
+            else: device.risk_level = "low"
+            
+            db.session.add(device)
+        except Exception as e:
+            current_app.logger.error(f"Risk scoring failed: {e}")
 
     # Create an IncidentManager instance (used later)
     incident_mgr = IncidentManager(current_app)

@@ -93,8 +93,11 @@ def register_agent():
     mem = to_float(data.get("mem_percent"), 0.0)
 
     if device:
-        # Update organization if changed (Device moved/re-registered)
-        device.organization_id = org.id
+        # SECURITY FIX: Prevent device takeover from another organization
+        if device.organization_id != org.id:
+            return json_error("Device MAC already registered to another organization. Deregister it first.", 403)
+
+        # Update metadata for same-org device
         device.device_name = hostname
         device.os = os_name
         device.ip = ip_addr
@@ -184,9 +187,9 @@ def heartbeat():
     if not device:
         return json_error("Device not registered. Call /register first.", 404)
 
-    # Auto-correct organization if mismatch (e.g. token changed)
+    # SECURITY FIX: Prevent device takeover
     if device.organization_id != org.id:
-        device.organization_id = org.id
+        return json_error("Device MAC registered to another organization.", 403)
 
     # -------------------------
     # Update device
