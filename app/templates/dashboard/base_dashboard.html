@@ -64,6 +64,20 @@
       <li class="nav-item mb-1">
         <a href="{{ url_for('dashboard.subscription') }}"
           class="nav-link text-white {% if 'subscription' in request.endpoint %}active{% endif %}">
+          <i class="fa-solid fa-credit-card me-2"></i> Subscription
+        </a>
+      </li>
+      <li class="nav-item mb-1">
+        <a href="{{ url_for('dashboard.portfolio') }}"
+          class="nav-link text-white {% if 'portfolio' in request.endpoint %}active{% endif %}">
+          <i class="fa-solid fa-briefcase me-2"></i> Portfolio
+        </a>
+      </li>
+      <li class="nav-item mt-3 pt-3 border-top border-secondary">
+        <a href="{{ url_for('auth.logout') }}" class="nav-link text-danger">
+          <i class="fa-solid fa-right-from-bracket me-2"></i> Logout
+        </a>
+      </li>
     </ul>
 
     <!-- Theme Toggle -->
