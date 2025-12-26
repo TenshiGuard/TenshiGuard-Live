@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TenshiGuard AI - Project Documentation</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+        :root {
+            --primary: #0f172a;
+            --accent: #2563eb;
+            --text: #334155;
+            --bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+            background: var(--bg);
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: var(--primary);
+            margin-top: 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            border-bottom: 3px solid var(--accent);
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            border-left: 4px solid var(--accent);
+            padding-left: 1rem;
+            margin-top: 3rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            text-align: justify;
+        }
+
+        ul {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .meta {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-bottom: 3rem;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 1rem;
+        }
+
+        .highlight {
+            background: #eff6ff;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #bfdbfe;
+            margin: 1.5rem 0;
+        }
+
+        .print-btn {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: var(--accent);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .print-btn:hover {
+            background: #1d4ed8;
+        }
+
+        @media print {
+            .print-btn {
+                display: none;
+            }
+
+            body {
+                padding: 0;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <button class="print-btn" onclick="window.print()">Download PDF</button>
+
+    <h1>TenshiGuard AI</h1>
+    <div class="meta">
+        <strong>Project Type:</strong> Enterprise Endpoint Security Platform<br>
+        <strong>Version:</strong> 1.0.0 (Live)<br>
+        <strong>Date:</strong> December 2025
+    </div>
+
+    <h2>1. Executive Summary</h2>
+    <p>TenshiGuard AI is a next-generation cybersecurity platform designed to bridge the gap between expensive
+        enterprise EDR solutions and basic consumer antivirus software. By leveraging a hybrid approach of
+        signature-based detection and AI-driven behavioral analysis, TenshiGuard provides real-time protection against
+        both known malware and zero-day threats.</p>
+
+    <h2>2. Project Agenda & Objectives</h2>
+    <p>The primary agenda of this project was to architect a scalable, multi-tenant security system that could:</p>
+    <ul>
+        <li><strong>Democratize Security:</strong> Make enterprise-grade threat detection accessible to smaller
+            organizations.</li>
+        <li><strong>Automate Response:</strong> Reduce the time between detection and mitigation using AI correlation.
+        </li>
+        <li><strong>Ensure Privacy:</strong> Implement strict multi-tenancy to guarantee data isolation between
+            organizations.</li>
+    </ul>
+
+    <h2>3. Problem Statement</h2>
+    <p>Modern cyber threats are evolving faster than traditional defenses.
+    <ul>
+        <li><strong>Legacy AV Failure:</strong> Traditional antivirus relies on known signatures, failing to stop new,
+            polymorphic malware.</li>
+        <li><strong>Alert Fatigue:</strong> Security teams are overwhelmed by thousands of false positives.</li>
+        <li><strong>Fragmented Tools:</strong> Admins have to juggle separate tools for monitoring, antivirus, and
+            network analysis.</li>
+    </ul>
+    </p>
+
+    <h2>4. Our Solution</h2>
+    <div class="highlight">
+        <strong>TenshiGuard AI</strong> unifies endpoint monitoring, threat detection, and incident response into a
+        single pane of glass.
+    </div>
+    <p>We tackle these problems through:</p>
+    <ul>
+        <li><strong>Unified Agent:</strong> A single lightweight agent that collects telemetry, monitors files, and
+            enforces policies.</li>
+        <li><strong>AI Correlation Engine:</strong> A backend service that analyzes streams of events to identify
+            complex attack patterns (e.g., "Brute Force" followed by "Lateral Movement").</li>
+        <li><strong>Command Center:</strong> A centralized dashboard for instant visibility and remote control.</li>
+    </ul>
+
+    <h2>5. Technical Architecture</h2>
+    <p>The system is built on a robust, modern stack:</p>
+    <ul>
+        <li><strong>Backend:</strong> Python Flask with SQLAlchemy for ORM.</li>
+        <li><strong>Database:</strong> PostgreSQL for production-grade reliability.</li>
+        <li><strong>Frontend:</strong> HTML5, Bootstrap 5, and Vanilla JS for a fast, responsive UI.</li>
+        <li><strong>AI Engine:</strong> Scikit-learn for anomaly detection and custom heuristic rule engines.</li>
+    </ul>
+
+    <h2>6. Key Features & Capabilities</h2>
+    <ul>
+        <li><strong>Real-Time Telemetry:</strong> Live monitoring of CPU, RAM, and network usage.</li>
+        <li><strong>Remote Kill Switch:</strong> Admins can isolate a device or kill a malicious process remotely.</li>
+        <li><strong>Multi-Tenancy:</strong> Strict data isolation ensures Organization A never sees Organization B's
+            data.</li>
+        <li><strong>Feedback Loop:</strong> The AI learns from admin feedback (True/False Positive) to improve over
+            time.</li>
+    </ul>
+
+    <h2>7. Conclusion</h2>
+    <p>TenshiGuard AI represents a significant step forward in accessible automated security. By combining the speed of
+        automated heuristics with the adaptability of Machine Learning, it provides a robust defense against the modern
+        threat landscape.</p>
+
+    <br><br>
+    <hr>
+    <p style="text-align: center; font-size: 0.8rem; color: #94a3b8;">Generated by TenshiGuard AI Documentation System
+    </p>
+</body>
+
+</html>

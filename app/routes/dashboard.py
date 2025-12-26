@@ -132,6 +132,19 @@ def index():
     return user_dashboard()
 
 # ============================================================
+# 🎨 PUBLIC PORTFOLIO & DOCS
+# ============================================================
+@dashboard_bp.route("/portfolio")
+def portfolio():
+    """Public portfolio page for HR/Recruiters."""
+    return render_template("portfolio.html")
+
+@dashboard_bp.route("/documentation")
+def documentation():
+    """Public documentation page (Print to PDF)."""
+    return render_template("documentation.html")
+
+# ============================================================
 # 👤 USER DASHBOARD
 # ============================================================
 @dashboard_bp.route("/dashboard/user")

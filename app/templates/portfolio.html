@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TenshiGuard AI - Developer Portfolio</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/portfolio.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <a href="#" class="logo">TenshiGuard<span style="color: var(--accent-color);">.Dev</span></a>
+                <div class="nav-links">
+                    <a href="#about">About</a>
+                    <a href="#modules">System Modules</a>
+                    <a href="#tech">Tech Stack</a>
+                    <a href="{{ url_for('main.documentation') }}" class="special-link">Documentation (PDF)</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero" id="about">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Next-Gen Endpoint Security</h1>
+                <p class="subtitle">Architected and built <strong>TenshiGuard AI</strong>, a comprehensive cybersecurity
+                    platform combining real-time telemetry, AI-driven threat detection, and cloud-native orchestration.
+                </p>
+                <div class="hero-btns">
+                    <a href="#modules" class="btn">Explore Architecture</a>
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline">Live Demo</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="modules" class="projects">
+        <div class="container">
+            <h2 class="section-title">System Architecture & Modules</h2>
+            <p class="section-desc">TenshiGuard is not just a tool; it's an ecosystem. Here are the core components I
+                built:</p>
+
+            <div class="project-grid">
+                <!-- Module 1: The Agent -->
+                <div class="project-card">
+                    <div class="card-icon"><i class="fa-brands fa-windows"></i></div>
+                    <h3>Intelligent Endpoint Agent</h3>
+                    <p>A lightweight, Python/PowerShell-based agent that runs on client devices. It captures system
+                        telemetry (CPU/RAM), monitors file system events, and enforces security policies in real-time.
+                    </p>
+                    <div class="tags">
+                        <span class="tag">Python</span>
+                        <span class="tag">PowerShell</span>
+                        <span class="tag">System API</span>
+                    </div>
+                </div>
+
+                <!-- Module 2: The Core -->
+                <div class="project-card">
+                    <div class="card-icon"><i class="fa-solid fa-brain"></i></div>
+                    <h3>AI Correlation Engine</h3>
+                    <p>The brain of the operation. It ingests thousands of events, correlates disparate signals (e.g.,
+                        failed logins + file download), and uses Machine Learning to detect zero-day anomalies.</p>
+                    <div class="tags">
+                        <span class="tag">Scikit-Learn</span>
+                        <span class="tag">Heuristics</span>
+                        <span class="tag">Data Pipelines</span>
+                    </div>
+                </div>
+
+                <!-- Module 3: The Dashboard -->
+                <div class="project-card">
+                    <div class="card-icon"><i class="fa-solid fa-chart-line"></i></div>
+                    <h3>Command Center Dashboard</h3>
+                    <p>A responsive, real-time admin interface built with Flask and Vanilla JS. Features live charts,
+                        remote device management, and an interactive threat map.</p>
+                    <div class="tags">
+                        <span class="tag">Flask</span>
+                        <span class="tag">Chart.js</span>
+                        <span class="tag">Bootstrap 5</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="tech" class="skills">
+        <div class="container">
+            <h2 class="section-title">Technologies Used</h2>
+            <div class="skills-grid">
+                <div class="skill-item">
+                    <i class="fa-brands fa-python"></i>
+                    <h3>Python 3.9+</h3>
+                    <p>Backend & Agent Logic</p>
+                </div>
+                <div class="skill-item">
+                    <i class="fa-solid fa-database"></i>
+                    <h3>SQLAlchemy</h3>
+                    <p>ORM & Database Abstraction</p>
+                </div>
+                <div class="skill-item">
+                    <i class="fa-solid fa-server"></i>
+                    <h3>Flask</h3>
+                    <p>REST API & Web Server</p>
+                </div>
+                <div class="skill-item">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <h3>Cybersecurity</h3>
+                    <p>Threat Analysis & Mitigation</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="contact">
+        <div class="container">
+            <h2 class="section-title">Ready to Secure the Future?</h2>
+            <p>This project demonstrates my ability to build complex, full-stack security solutions from scratch.</p>
+            <div class="contact-links">
+                <a href="https://github.com/TenshiGuard/TenshiGuard-Live" target="_blank" class="contact-link"
+                    title="GitHub"><i class="fa-brands fa-github"></i></a>
+                <a href="mailto:contact@tenshiguard.ai" class="contact-link" title="Email"><i
+                        class="fa-solid fa-envelope"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 TenshiGuard AI. Built with ❤️ and ☕.</p>
+        </div>
+    </footer>
+</body>
+
+</html>
